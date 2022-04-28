@@ -49,11 +49,11 @@ type mongoAdapter struct {
 	logger logger.Logger
 }
 
-func NewMongoAdapter(coll *mongo.Collection, logger logger.Logger) Adapter {
+func NewMongoAdapter(coll *mongo.Collection, logger logger.Logger) *mongoAdapter {
 	return &mongoAdapter{coll, logger}
 }
 
-func EnsureIndexes(ctx context.Context, coll *mongo.Collection) error {
+func (m *mongoAdapter) EnsureIndexes(ctx context.Context) error {
 	unique := options.IndexOptions{
 		Unique: pointers.Pointer(true),
 	}
@@ -64,7 +64,7 @@ func EnsureIndexes(ctx context.Context, coll *mongo.Collection) error {
 		Options: &unique,
 	}
 
-	_, err := coll.Indexes().CreateOne(ctx, userIDIdx)
+	_, err := m.coll.Indexes().CreateOne(ctx, userIDIdx)
 	if err != nil {
 		return fmt.Errorf("cannot create unique name:1 index: %w", err)
 	}

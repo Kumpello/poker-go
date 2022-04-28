@@ -6,12 +6,12 @@ Poker-GO is a tool allowing to manage poker-games.
 
 - All users are required to create an account.
 - For authentication a JWT token is required.
-- To signup use `/auth/singup`
+- To signup use `/auth/signup`
 
 ```go
 package auth
 
-type singUpRequest struct {
+type signUpRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Password string `json:"password" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`

@@ -6,18 +6,27 @@
 	},
 	"item": [
 		{
-			"name": "/auth/singup",
+			"name": "/auth/signup",
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"pmaterna2\",\n    \"email\": \"pm@abc.pl\",\n    \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "{{host}}/auth/singup",
+					"raw": "{{host}}/auth/signup",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
 						"auth",
-						"singup"
+						"signup"
 					]
 				}
 			},
@@ -25,17 +34,47 @@
 		},
 		{
 			"name": "/auth/login",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"token\", jsonData[\"token\"]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"pmaterna\",\n    \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "{{host}}/auth/singup",
+					"raw": "{{host}}/auth/login",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
 						"auth",
-						"singup"
+						"login"
 					]
 				}
 			},
@@ -45,7 +84,112 @@
 			"name": "health",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/health",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/org/newOrg",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"pm-org-1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/org/newOrg",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"org",
+						"newOrg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/org/listOrg",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/org/listOrg",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"org",
+						"listOrg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/org/addToOrg",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"pm-org-1\",\n    \"who\": \"pmaterna2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/org/addToOrg",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"org",
+						"addToOrg"
+					]
+				}
 			},
 			"response": []
 		}

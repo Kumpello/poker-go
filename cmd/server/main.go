@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/go-playground/validator"
 	"pokergo/internal/mongo"
+	"pokergo/internal/org"
 	"pokergo/internal/users"
+	"pokergo/internal/webapi"
 	"pokergo/internal/webapi/auth"
-	"pokergo/internal/webapi/echo"
+	webOrg "pokergo/internal/webapi/org"
 	"pokergo/pkg/env"
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/logger"
@@ -30,17 +32,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot init mongo: %s", err.Error())
 	}
-	if err := users.EnsureIndexes(appCtx, mongoCollections.Users); err != nil {
+	userAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
+	if err := userAdapter.EnsureIndexes(appCtx); err != nil {
 		log.Fatalf("cannot create indexes on users collection", err)
 	}
-	userAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
+	orgAdapter := org.NewMongoAdapter(mongoCollections.Org, utcTimer)
+	if err := userAdapter.EnsureIndexes(appCtx); err != nil {
+		log.Fatalf("cannot create indexes on organizations collection", err)
+	}
 
 	// Echo
 	valid := validator.New()
 	jwtSecret := env.Env("JWT_SECRET", "jwt-token-123")
 	jwtInstance := jwt.NewJWT(utcTimer, []byte(jwtSecret), time.Duration(168)*time.Hour)
+
 	authMux := auth.NewMux(userAdapter, utcTimer, jwtInstance, valid)
-	e := echo.NewEcho(jwtInstance, authMux)
+	orgMux := webOrg.NewMux(orgAdapter, userAdapter)
+
+	e := webapi.NewEcho(jwtInstance, authMux, orgMux)
 
 	// Start server
 	port := env.Env("APP_PORT", "8080")

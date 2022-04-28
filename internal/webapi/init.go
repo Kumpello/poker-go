@@ -1,15 +1,32 @@
-package echo
+package webapi
 
 import (
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"pokergo/pkg/jwt"
 )
 
-func NewEcho(jwtInstance *jwt.JWT, authMux Router) *echo.Echo {
+type Router interface {
+	Route(e *echo.Echo, prefix string) error
+}
+
+func GetJWTToken(c echo.Context) (jwt.SignedToken, error) {
+	token := c.Get("user")
+	jwtToken, ok := token.(jwt.SignedToken)
+	if !ok {
+		return jwt.SignedToken{}, errors.New("invalid jwt token")
+	}
+
+	return jwtToken, nil
+}
+
+func NewEcho(jwtInstance *jwt.JWT, authMux Router, orgRouter Router) *echo.Echo {
 	e := echo.New()
 
 	_ = authMux.Route(e, "auth")
+	_ = orgRouter.Route(e, "org")
+
 	e.GET("health", func(c echo.Context) error {
 		return c.JSON(200, "ok")
 	})

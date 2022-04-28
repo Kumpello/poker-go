@@ -31,16 +31,16 @@ func NewMux(
 }
 
 func (m *mux) Route(e *echo.Echo, prefix string) error {
-	e.POST(prefix+"/singup", m.SingUp)
+	e.POST(prefix+"/signup", m.SignUp)
 	e.POST(prefix+"/login", m.LogIn)
 	return nil
 }
 
-func (m *mux) SingUp(c echo.Context) error {
+func (m *mux) SignUp(c echo.Context) error {
 	reqCtx, cancel := context.WithTimeout(c.Request().Context(), time.Duration(60)*time.Second)
 	defer cancel()
 
-	var request singUpRequest
+	var request signUpRequest
 	if err := c.Bind(&request); err != nil {
 		return c.String(400, fmt.Sprintf("invalid request: %s", err.Error()))
 	}

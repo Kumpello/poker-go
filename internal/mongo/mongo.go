@@ -8,8 +8,13 @@ import (
 	"time"
 )
 
+type Indexable interface {
+	EnsureIndexes(ctx context.Context) error
+}
+
 type Collections struct {
 	Users *mongo.Collection
+	Org   *mongo.Collection
 }
 
 func NewMongo(ctx context.Context, uri, authDB, user, pass, db string) (*Collections, error) {
@@ -38,5 +43,6 @@ func NewMongo(ctx context.Context, uri, authDB, user, pass, db string) (*Collect
 
 	return &Collections{
 		Users: appDB.Collection("users"),
+		Org:   appDB.Collection("organizations"),
 	}, nil
 }
