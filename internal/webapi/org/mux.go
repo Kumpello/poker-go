@@ -91,7 +91,6 @@ func (m *mux) AddToOrg(c echo.Context) error {
 	for _, oo := range o.Members {
 		if oo == requesterID {
 			isMember = true
-			break
 		}
 		if oo == usr.ID {
 			return c.String(400, "user already is a member of this org")
@@ -128,5 +127,32 @@ func (m *mux) ListOrg(c echo.Context) error {
 		return c.String(500, fmt.Sprintf("cannot fetch data: %s", err.Error()))
 	}
 
-	return c.JSON(200, listUserOrgResponse{orgs})
+	var response []orgResponse
+	for _, o := range orgs {
+		members, err := m.userAdapter.UserDetails(reqCtx, o.Members)
+		if err != nil {
+			return c.String(500, fmt.Sprintf("cannot get org-details: %s", err.Error()))
+		}
+
+		response = append(response, orgResponse{
+			ID:        o.ID.Hex(),
+			Name:      o.Name,
+			Admin:     members[o.ID].Username,
+			Members:   idAndNames(members),
+			CreatedAt: o.CreatedAt,
+		})
+	}
+
+	return c.JSON(200, listUserOrgResponse{response})
+}
+
+func idAndNames(input map[id.ID]users.User) []idWithName {
+	var res []idWithName
+	for _, v := range input {
+		res = append(res, idWithName{
+			ID:   v.ID.Hex(),
+			Name: v.Username,
+		})
+	}
+	return res
 }

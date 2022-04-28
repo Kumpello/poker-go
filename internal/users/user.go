@@ -14,21 +14,21 @@ import (
 
 type User struct {
 	// ID is internal ID
-	ID id.ID `bson:"_id" json:"id"`
+	ID id.ID `bson:"_id"`
 	// Username is a unique name of player (nick), used for login as well
-	Username string `bson:"name" json:"name"`
+	Username string `bson:"name"`
 	// Email is user email
-	Email string `bson:"email" json:"email"`
+	Email string `bson:"email"`
 	// Password is an encrypted password
-	Password string `bson:"password" json:"password"`
+	Password string `bson:"password"`
 	// Token is a jwt-token
-	Token string `bson:"token" json:"token"`
+	Token string `bson:"token"`
 	// RefreshToken is jwt-refresh-token
-	RefreshToken string `bson:"refresh_token" json:"refresh_token"`
+	RefreshToken string `bson:"refresh_token"`
 	// CreatedAt tells when the user was created
-	CreatedAt time.Time `bson:"created_at" json:"created_at"`
+	CreatedAt time.Time `bson:"created_at"`
 	// UpdatedAt tells when the last update was done
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
+	UpdatedAt time.Time `bson:"updated_at"`
 }
 
 type Adapter interface {
@@ -36,13 +36,13 @@ type Adapter interface {
 	GetUserByName(ctx context.Context, name string) (User, error)
 	GetUserByID(ctx context.Context, id id.ID) (User, error)
 
+	UserDetails(ctx context.Context, ids []id.ID) (map[id.ID]User, error)
+
 	// UpdateTokens update user tokens (if they are not nil)
 	UpdateTokens(ctx context.Context, userID id.ID, token, refreshedToken *string) error
 }
 
 var ErrUserNotExists = mongo.ErrNoDocuments
-
-// TODO: create indexes for struct (name: unique)
 
 type mongoAdapter struct {
 	coll   *mongo.Collection
@@ -116,6 +116,29 @@ func (m *mongoAdapter) GetUserByID(ctx context.Context, id id.ID) (User, error) 
 	}
 
 	return user, nil
+}
+
+func (m *mongoAdapter) UserDetails(ctx context.Context, ids []id.ID) (map[id.ID]User, error) {
+	filter := bson.M{
+		"_id": bson.M{
+			"$in": ids,
+		},
+	}
+	c, err := m.coll.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("cannot perform find query: %s", err.Error())
+	}
+
+	var users []User
+	if err := c.All(ctx, &users); err != nil {
+		return nil, fmt.Errorf("cannot decode query result: %s", err.Error())
+	}
+
+	res := make(map[id.ID]User, len(users))
+	for _, v := range users {
+		res[v.ID] = v
+	}
+	return res, nil
 }
 
 func (m *mongoAdapter) UpdateTokens(ctx context.Context, userID id.ID, token, refreshedToken *string) error {

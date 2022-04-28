@@ -14,11 +14,11 @@ import (
 )
 
 type Org struct {
-	ID        id.ID     `bson:"_id" json:"id"`
-	Name      string    `bson:"name" json:"name"`
-	Admin     id.ID     `bson:"admin" json:"admin"`
-	Members   []id.ID   `bson:"members" json:"members"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at"`
+	ID        id.ID     `bson:"_id"`
+	Name      string    `bson:"name"`
+	Admin     id.ID     `bson:"admin"`
+	Members   []id.ID   `bson:"members"`
+	CreatedAt time.Time `bson:"created_at"`
 }
 
 type Adapter interface {
