@@ -116,7 +116,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"pm-org-1\"\n}",
+					"raw": "{\n    \"name\": \"pm-org-2\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -173,7 +173,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"pm-org-1\",\n    \"who\": \"pmaterna2\"\n}",
+					"raw": "{\n    \"name\": \"pm-org-2\",\n    \"who\": \"pmaterna2\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -188,6 +188,171 @@
 					"path": [
 						"org",
 						"addToOrg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/game/createGame",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"org\": \"pm-org-1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/game/createGame",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"game",
+						"createGame"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/game/appendPlayer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"game_id\": \"626cfe4297db7e2f701750fe\",\n    \"user_id\": \"626acc1a1f5225a9c05059b3\",\n    \"user_name\": \"pmaterna2\",\n    \"start_stack\": 1000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/game/appendPlayer",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"game",
+						"appendPlayer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/game/setFinishStack",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"game_id\": \"626cfe4297db7e2f701750fe\",\n    \"user_name\": \"pmaterna\",\n    \"finish_stack\": 0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/game/setFinishStack",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"game",
+						"setFinishStack"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/game/reBuyIn",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"game_id\": \"626cfe4297db7e2f701750fe\",\n    \"user_name\": \"pmaterna\",\n    \"buy_in\": 100\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/game/reBuyIn",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"game",
+						"reBuyIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/game/reBuyInFromPlayer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"game_id\": \"626cfe4297db7e2f701750fe\",\n    \"user_name\": \"pmaterna\",\n    \"from_name\": \"pmaterna2\",\n    \"buy_in\": 100\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/game/reBuyInFromPlayer",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"game",
+						"reBuyInFromPlayer"
 					]
 				}
 			},

@@ -21,11 +21,16 @@ func GetJWTToken(c echo.Context) (jwt.SignedToken, error) {
 	return jwtToken, nil
 }
 
-func NewEcho(jwtInstance *jwt.JWT, authMux Router, orgRouter Router) *echo.Echo {
+func NewEcho(
+	jwtInstance *jwt.JWT,
+	authMux Router,
+	orgRouter Router,
+	gameRouter Router) *echo.Echo {
 	e := echo.New()
 
 	_ = authMux.Route(e, "auth")
 	_ = orgRouter.Route(e, "org")
+	_ = gameRouter.Route(e, "game")
 
 	e.GET("health", func(c echo.Context) error {
 		return c.JSON(200, "ok")

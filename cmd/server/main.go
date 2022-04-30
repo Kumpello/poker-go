@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-playground/validator"
+	"pokergo/internal/game"
 	"pokergo/internal/mongo"
 	"pokergo/internal/org"
 	"pokergo/internal/users"
 	"pokergo/internal/webapi"
-	"pokergo/internal/webapi/auth"
-	webOrg "pokergo/internal/webapi/org"
+	authMux "pokergo/internal/webapi/auth"
+	gameMux "pokergo/internal/webapi/game"
+	orgMux "pokergo/internal/webapi/org"
 	"pokergo/pkg/env"
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/logger"
@@ -32,24 +34,31 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot init mongo: %s", err.Error())
 	}
-	userAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
-	if err := userAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on users collection", err)
+	usersAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
+	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
+		log.Fatalf("cannot create indexes on users collection: %w", err)
 	}
 	orgAdapter := org.NewMongoAdapter(mongoCollections.Org, utcTimer)
-	if err := userAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on organizations collection", err)
+	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
+		log.Fatalf("cannot create indexes on organizations collection: %w", err)
 	}
+	gameAdapter := game.NewMongoAdapter(mongoCollections.Games, utcTimer)
+	if err := gameAdapter.EnsureIndexes(appCtx); err != nil {
+		log.Fatalf("cannot create indexes on games collection: %w", err)
+	}
+
+	gameManager := game.NewManager(gameAdapter, usersAdapter, orgAdapter)
 
 	// Echo
 	valid := validator.New()
 	jwtSecret := env.Env("JWT_SECRET", "jwt-token-123")
 	jwtInstance := jwt.NewJWT(utcTimer, []byte(jwtSecret), time.Duration(168)*time.Hour)
 
-	authMux := auth.NewMux(userAdapter, utcTimer, jwtInstance, valid)
-	orgMux := webOrg.NewMux(orgAdapter, userAdapter)
+	authRouter := authMux.NewMux(usersAdapter, utcTimer, jwtInstance)
+	orgRouter := orgMux.NewMux(valid, orgAdapter, usersAdapter)
+	gameRouter := gameMux.NewMux(valid, gameManager)
 
-	e := webapi.NewEcho(jwtInstance, authMux, orgMux)
+	e := webapi.NewEcho(jwtInstance, authRouter, orgRouter, gameRouter)
 
 	// Start server
 	port := env.Env("APP_PORT", "8080")

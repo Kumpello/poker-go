@@ -1,24 +1,23 @@
 package org
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"pokergo/internal/org"
 	"pokergo/internal/users"
-	"pokergo/internal/webapi"
+	"pokergo/internal/webapi/binder"
 	"pokergo/pkg/id"
-	"time"
 )
 
 type mux struct {
+	binder.StructValidator
 	orgAdapter  org.Adapter
 	userAdapter users.Adapter
 }
 
-func NewMux(orgAdapter org.Adapter, userAdapter users.Adapter) *mux {
-	return &mux{orgAdapter: orgAdapter, userAdapter: userAdapter}
+func NewMux(validator binder.StructValidator, orgAdapter org.Adapter, userAdapter users.Adapter) *mux {
+	return &mux{validator, orgAdapter, userAdapter}
 }
 
 func (m *mux) Route(e *echo.Echo, prefix string) error {
@@ -29,23 +28,13 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 }
 
 func (m *mux) NewOrg(c echo.Context) error {
-	reqCtx, cancel := context.WithTimeout(c.Request().Context(), time.Duration(60)*time.Second)
-	defer cancel()
-
-	jwtToken, err := webapi.GetJWTToken(c)
-	if err != nil {
-		return c.String(403, "jwt token invalid")
+	data, req, bindErr := binder.BindRequest[newOrgRequest](c, m)
+	if bindErr != nil {
+		return c.String(bindErr.Code, bindErr.Message)
 	}
+	defer data.Cancel()
 
-	// no need to verify if the user exists - jwt already did the job
-
-	var request newOrgRequest
-	if err := c.Bind(&request); err != nil {
-		return c.String(400, fmt.Sprintf("invalid request: %s", err))
-	}
-
-	uID := id.FromString(jwtToken.ID)
-	o, err := m.orgAdapter.CreateOrg(reqCtx, uID, request.Name)
+	o, err := m.orgAdapter.CreateOrg(data.Ctx, data.UserID, req.Name)
 	if err != nil {
 		return c.String(500, fmt.Sprintf("cannot create organization: %s", err))
 	}
@@ -57,21 +46,13 @@ func (m *mux) NewOrg(c echo.Context) error {
 }
 
 func (m *mux) AddToOrg(c echo.Context) error {
-	reqCtx, cancel := context.WithTimeout(c.Request().Context(), time.Duration(60)*time.Second)
-	defer cancel()
-
-	jwtToken, err := webapi.GetJWTToken(c)
-	if err != nil {
-		return c.String(403, "jwt token invalid")
+	data, req, bindErr := binder.BindRequest[addToOrgRequest](c, m)
+	if bindErr != nil {
+		return c.String(bindErr.Code, bindErr.Message)
 	}
-	requesterID := id.FromString(jwtToken.ID)
+	defer data.Cancel()
 
-	var request addToOrgRequest
-	if err := c.Bind(&request); err != nil {
-		return c.String(400, fmt.Sprintf("invalid request: %s", err))
-	}
-
-	o, err := m.orgAdapter.GetOrgByName(reqCtx, request.OrgName)
+	o, err := m.orgAdapter.GetOrgByName(data.Ctx, req.OrgName)
 	if err != nil {
 		if errors.Is(err, org.ErrOrgNotExists) {
 			return c.String(404, fmt.Sprintf("org not exists"))
@@ -79,7 +60,7 @@ func (m *mux) AddToOrg(c echo.Context) error {
 		return c.String(500, fmt.Sprintf("cannot find org: %s", err.Error()))
 	}
 
-	usr, err := m.userAdapter.GetUserByName(reqCtx, request.Who)
+	usr, err := m.userAdapter.GetUserByName(data.Ctx, req.Who)
 	if err != nil {
 		if errors.Is(err, users.ErrUserNotExists) {
 			return c.String(404, fmt.Sprintf("user not exists"))
@@ -87,20 +68,17 @@ func (m *mux) AddToOrg(c echo.Context) error {
 		return c.String(500, fmt.Sprintf("cannot perform the query: %s", err.Error()))
 	}
 
-	isMember := false
-	for _, oo := range o.Members {
-		if oo == requesterID {
-			isMember = true
-		}
-		if oo == usr.ID {
-			return c.String(400, "user already is a member of this org")
-		}
+	alreadyPresent := o.IsMember(usr.ID)
+	if alreadyPresent {
+		return c.String(400, "user already is a member of this org")
 	}
-	if !isMember {
+
+	canAddMember := o.IsMember(data.UserID)
+	if !canAddMember {
 		return c.String(403, fmt.Sprintf("a user is NOT a member of the organization"))
 	}
 
-	if err := m.orgAdapter.AddToOrg(reqCtx, o.ID, usr.ID); err != nil {
+	if err := m.orgAdapter.AddToOrg(data.Ctx, o.ID, usr.ID); err != nil {
 		return c.String(500, fmt.Sprintf("cannot add user to org"))
 	}
 
@@ -108,28 +86,20 @@ func (m *mux) AddToOrg(c echo.Context) error {
 }
 
 func (m *mux) ListOrg(c echo.Context) error {
-	reqCtx, cancel := context.WithTimeout(c.Request().Context(), time.Duration(60)*time.Second)
-	defer cancel()
-
-	jwtToken, err := webapi.GetJWTToken(c)
-	if err != nil {
-		return c.String(403, "jwt token invalid")
+	data, _, bindErr := binder.BindRequest[listUserOrgRequest](c, m)
+	if bindErr != nil {
+		return c.String(bindErr.Code, bindErr.Message)
 	}
-	requesterID := id.FromString(jwtToken.ID)
+	defer data.Cancel()
 
-	var request listUserOrgRequest
-	if err := c.Bind(&request); err != nil {
-		return c.String(400, fmt.Sprintf("invalid request: %s", err.Error()))
-	}
-
-	orgs, err := m.orgAdapter.ListUserOrg(reqCtx, requesterID)
+	orgs, err := m.orgAdapter.ListUserOrg(data.Ctx, data.UserID)
 	if err != nil {
 		return c.String(500, fmt.Sprintf("cannot fetch data: %s", err.Error()))
 	}
 
 	var response []orgResponse
 	for _, o := range orgs {
-		members, err := m.userAdapter.UserDetails(reqCtx, o.Members)
+		members, err := m.userAdapter.UserDetails(data.Ctx, o.Members)
 		if err != nil {
 			return c.String(500, fmt.Sprintf("cannot get org-details: %s", err.Error()))
 		}
@@ -138,7 +108,7 @@ func (m *mux) ListOrg(c echo.Context) error {
 			ID:        o.ID.Hex(),
 			Name:      o.Name,
 			Admin:     members[o.ID].Username,
-			Members:   idAndNames(members),
+			Members:   idsAndNames(members),
 			CreatedAt: o.CreatedAt,
 		})
 	}
@@ -146,7 +116,7 @@ func (m *mux) ListOrg(c echo.Context) error {
 	return c.JSON(200, listUserOrgResponse{response})
 }
 
-func idAndNames(input map[id.ID]users.User) []idWithName {
+func idsAndNames(input map[id.ID]users.User) []idWithName {
 	var res []idWithName
 	for _, v := range input {
 		res = append(res, idWithName{

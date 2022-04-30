@@ -3,7 +3,7 @@ package org
 import "time"
 
 type newOrgRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required"`
 }
 
 type newOrgResponse struct {
@@ -12,8 +12,8 @@ type newOrgResponse struct {
 }
 
 type addToOrgRequest struct {
-	OrgName string `json:"name"`
-	Who     string `json:"who"`
+	OrgName string `json:"name" validate:"required"`
+	Who     string `json:"who" validate:"required"`
 }
 
 type listUserOrgRequest struct {

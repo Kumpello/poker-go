@@ -21,7 +21,22 @@ type Org struct {
 	CreatedAt time.Time `bson:"created_at"`
 }
 
+func (o Org) IsMember(id id.ID) bool {
+	if id == o.Admin {
+		return true
+	}
+	for idx := range o.Members {
+		if o.Members[idx] == id {
+			return true
+		}
+	}
+	return false
+}
+
 type Adapter interface {
+	// GetOrgByID returns org by id
+	GetOrgByID(ctx context.Context, id id.ID) (Org, error)
+	// GetOrgByName returns org by its name
 	GetOrgByName(ctx context.Context, name string) (Org, error)
 	// CreateOrg creates a new Org
 	CreateOrg(ctx context.Context, admin id.ID, orgName string) (Org, error)
@@ -59,6 +74,27 @@ func (m *mongoAdapter) EnsureIndexes(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (m *mongoAdapter) GetOrgByID(ctx context.Context, id id.ID) (Org, error) {
+	filter := bson.M{
+		"_id": id,
+	}
+
+	res := m.coll.FindOne(ctx, filter)
+	if err := res.Err(); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return Org{}, ErrOrgNotExists
+		}
+		return Org{}, fmt.Errorf("cannot find org")
+	}
+
+	var org Org
+	if err := res.Decode(&org); err != nil {
+		return Org{}, fmt.Errorf("cannot decode result: %w", err)
+	}
+
+	return org, nil
 }
 
 func (m *mongoAdapter) GetOrgByName(ctx context.Context, name string) (Org, error) {

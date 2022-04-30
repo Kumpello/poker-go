@@ -10,12 +10,6 @@ func NewID() ID {
 	return primitive.NewObjectID()
 }
 
-func FromString(s string) ID {
-	var emptyID primitive.ObjectID
-	id, err := primitive.ObjectIDFromHex(s)
-	if err != nil {
-		return emptyID
-	}
-
-	return id
+func FromString(s string) (ID, error) {
+	return primitive.ObjectIDFromHex(s)
 }

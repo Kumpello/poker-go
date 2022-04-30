@@ -15,6 +15,7 @@ type Indexable interface {
 type Collections struct {
 	Users *mongo.Collection
 	Org   *mongo.Collection
+	Games *mongo.Collection
 }
 
 func NewMongo(ctx context.Context, uri, authDB, user, pass, db string) (*Collections, error) {
@@ -44,5 +45,6 @@ func NewMongo(ctx context.Context, uri, authDB, user, pass, db string) (*Collect
 	return &Collections{
 		Users: appDB.Collection("users"),
 		Org:   appDB.Collection("organizations"),
+		Games: appDB.Collection("games"),
 	}, nil
 }

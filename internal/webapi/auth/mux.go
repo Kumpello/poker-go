@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"pokergo/internal/users"
+	"pokergo/internal/webapi/binder"
 	"pokergo/pkg/crypto"
 	"pokergo/pkg/id"
 	"pokergo/pkg/jwt"
@@ -15,19 +15,18 @@ import (
 )
 
 type mux struct {
+	binder.StructValidator
 	userAdapter users.Adapter
 	timer       timer.Timer
 	jwt         *jwt.JWT
-	validator   *validator.Validate
 }
 
 func NewMux(
 	userAdapter users.Adapter,
 	timer timer.Timer,
 	jwt *jwt.JWT,
-	validator *validator.Validate,
 ) *mux {
-	return &mux{userAdapter: userAdapter, timer: timer, jwt: jwt, validator: validator}
+	return &mux{userAdapter: userAdapter, timer: timer, jwt: jwt}
 }
 
 func (m *mux) Route(e *echo.Echo, prefix string) error {
@@ -44,7 +43,7 @@ func (m *mux) SignUp(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return c.String(400, fmt.Sprintf("invalid request: %s", err.Error()))
 	}
-	if err := m.validator.Struct(request); err != nil {
+	if err := m.Struct(request); err != nil {
 		return c.String(400, fmt.Sprintf("invalid request: %s", err.Error()))
 	}
 
@@ -94,7 +93,7 @@ func (m *mux) LogIn(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return c.String(400, fmt.Sprintf("cannot bind input data: %s", err.Error()))
 	}
-	if err := m.validator.Struct(request); err != nil {
+	if err := m.Struct(request); err != nil {
 		return c.String(400, fmt.Sprintf("invalid request: %s", err.Error()))
 	}
 
