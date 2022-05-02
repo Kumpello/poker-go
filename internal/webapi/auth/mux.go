@@ -22,11 +22,12 @@ type mux struct {
 }
 
 func NewMux(
+	validator binder.StructValidator,
 	userAdapter users.Adapter,
 	timer timer.Timer,
 	jwt *jwt.JWT,
 ) *mux {
-	return &mux{userAdapter: userAdapter, timer: timer, jwt: jwt}
+	return &mux{validator, userAdapter, timer, jwt}
 }
 
 func (m *mux) Route(e *echo.Echo, prefix string) error {

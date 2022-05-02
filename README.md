@@ -29,7 +29,7 @@ type authResponse struct {
 }
 ```
 
-All requests (except `/auth/*`) are required to have JWT token attached (`Header: token`).
+All requests (except `/auth/*`) are required to have JWT token attached (`Header -> Authorization: Bearer <<token>>`).
 When token expires a user must renew it (with `/login`).
 
 # Development

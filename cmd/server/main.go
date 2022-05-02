@@ -11,6 +11,7 @@ import (
 	"pokergo/internal/webapi"
 	authMux "pokergo/internal/webapi/auth"
 	gameMux "pokergo/internal/webapi/game"
+	newsMux "pokergo/internal/webapi/news"
 	orgMux "pokergo/internal/webapi/org"
 	"pokergo/pkg/env"
 	"pokergo/pkg/jwt"
@@ -54,11 +55,22 @@ func main() {
 	jwtSecret := env.Env("JWT_SECRET", "jwt-token-123")
 	jwtInstance := jwt.NewJWT(utcTimer, []byte(jwtSecret), time.Duration(168)*time.Hour)
 
-	authRouter := authMux.NewMux(usersAdapter, utcTimer, jwtInstance)
+	authRouter := authMux.NewMux(valid, usersAdapter, utcTimer, jwtInstance)
 	orgRouter := orgMux.NewMux(valid, orgAdapter, usersAdapter)
 	gameRouter := gameMux.NewMux(valid, gameManager)
+	newsRouter := newsMux.NewMux(valid)
 
-	e := webapi.NewEcho(jwtInstance, authRouter, orgRouter, gameRouter)
+	isDebug := env.Env("DEBUG", "true")
+	e := webapi.NewEcho(
+		jwtInstance,
+		webapi.EchoRouters{
+			AuthMux:    authRouter,
+			OrgRouter:  orgRouter,
+			GameRouter: gameRouter,
+			NewsRouter: newsRouter,
+		},
+		log,
+		isDebug == "true")
 
 	// Start server
 	port := env.Env("APP_PORT", "8080")
