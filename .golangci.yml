@@ -1,0 +1,140 @@
+---
+run:
+  timeout: 10m
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - depguard
+    - dupl
+    - durationcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - forcetypeassert
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - gomoddirectives
+    - goprintffuncname
+    - gosec
+    - ifshort
+    - ireturn
+    - lll
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - predeclared
+    - promlinter
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - tagliatelle
+    - tenv
+    - thelper
+    - unconvert
+    - unparam
+    - wastedassign
+    - wrapcheck
+
+issues:
+  exclude-rules:
+    - path: internal/worker/notifier/param.go
+      # TODO: Remove nolint (linter not supports go1.18 features)
+      linters:
+        - typecheck
+    - path: _test\.go
+      linters:
+        - dupl
+        - errcheck
+        - forcetypeassert
+        - funlen
+        - gochecknoglobals
+        - gochecknoinits
+        - goconst
+        - gocyclo
+        - goerr113
+        - ifshort
+        - ireturn
+        - lll
+
+linters-settings:
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+  errcheck:
+    check-blank: true
+  govet:
+    check-shadowing: true
+  nakedret:
+    max-func-lines: 0
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+      - multierr.Append(
+      - multierr.Combine(
+      - endpoints. # this is returned to the client and handled by the framework
+      - (github.com/labstack/echo/v4.Context).JSON( # echo
+      - (github.com/labstack/echo/v4.Context).String(
+  revive:
+    confidence: 0.8
+    enable-all-rules: false
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
