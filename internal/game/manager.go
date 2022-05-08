@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+
 	"pokergo/internal/org"
 	"pokergo/internal/users"
 	"pokergo/pkg/id"
 	"pokergo/pkg/logger"
-	"sync"
 )
 
 type Manager interface {

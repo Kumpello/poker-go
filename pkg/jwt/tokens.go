@@ -3,10 +3,11 @@ package jwt
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/golang-jwt/jwt"
 	"pokergo/pkg/id"
 	"pokergo/pkg/timer"
-	"time"
 )
 
 type JWT struct {

@@ -3,18 +3,19 @@ package users
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"pokergo/pkg/id"
 	"pokergo/pkg/logger"
 	"pokergo/pkg/pointers"
-	"time"
 )
 
 type User struct {
 	// ID is internal ID
-	ID id.ID `bson:"_id"`
+	ID id.ID `bson:"_id"` // nolint:tagliatelle // mongo-id
 	// Username is a unique name of player (nick), used for login as well
 	Username string `bson:"name"`
 	// Email is user email
@@ -126,12 +127,12 @@ func (m *mongoAdapter) UserDetails(ctx context.Context, ids []id.ID) (map[id.ID]
 	}
 	c, err := m.coll.Find(ctx, filter)
 	if err != nil {
-		return nil, fmt.Errorf("cannot perform find query: %s", err.Error())
+		return nil, fmt.Errorf("cannot perform find query: %w", err)
 	}
 
 	var users []User
 	if err := c.All(ctx, &users); err != nil {
-		return nil, fmt.Errorf("cannot decode query result: %s", err.Error())
+		return nil, fmt.Errorf("cannot decode query result: %w", err)
 	}
 
 	res := make(map[id.ID]User, len(users))

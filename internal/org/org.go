@@ -4,17 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"pokergo/pkg/id"
 	"pokergo/pkg/pointers"
 	"pokergo/pkg/timer"
-	"time"
 )
 
 type Org struct {
-	ID        id.ID     `bson:"_id"`
+	ID        id.ID     `bson:"_id"` // nolint:tagliatelle // mongo-id
 	Name      string    `bson:"name"`
 	Admin     id.ID     `bson:"admin"`
 	Members   []id.ID   `bson:"members"`

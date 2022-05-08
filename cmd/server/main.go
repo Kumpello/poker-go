@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/go-playground/validator"
 	"pokergo/internal/game"
 	"pokergo/internal/mongo"
@@ -17,7 +19,6 @@ import (
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/logger"
 	"pokergo/pkg/timer"
-	"time"
 )
 
 func main() {
@@ -37,15 +38,15 @@ func main() {
 	}
 	usersAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
 	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on users collection: %w", err)
+		log.Fatalf("cannot create indexes on users collection: %s", err.Error())
 	}
 	orgAdapter := org.NewMongoAdapter(mongoCollections.Org, utcTimer)
 	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on organizations collection: %w", err)
+		log.Fatalf("cannot create indexes on organizations collection: %s", err.Error())
 	}
 	gameAdapter := game.NewMongoAdapter(mongoCollections.Games, utcTimer)
 	if err := gameAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on games collection: %w", err)
+		log.Fatalf("cannot create indexes on games collection: %s", err.Error())
 	}
 
 	gameManager := game.NewManager(gameAdapter, usersAdapter, orgAdapter)

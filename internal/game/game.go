@@ -3,10 +3,11 @@ package game
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	"pokergo/internal/users"
 	"pokergo/pkg/id"
 	"pokergo/pkg/logger"
-	"sync"
 )
 
 // Game is internal struct for keeping game state

@@ -3,10 +3,11 @@ package webapi
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/logger"
-	"strings"
 )
 
 type Router interface {
@@ -39,10 +40,10 @@ func NewEcho(
 	e := echo.New()
 	e.Debug = debug
 
-	_ = routers.AuthMux.Route(e, "auth")
-	_ = routers.OrgRouter.Route(e, "org")
-	_ = routers.GameRouter.Route(e, "game")
-	_ = routers.NewsRouter.Route(e, "news")
+	_ = routers.AuthMux.Route(e, "auth")    // nolint:errcheck // not returning error
+	_ = routers.OrgRouter.Route(e, "org")   // nolint:errcheck // not returning error
+	_ = routers.GameRouter.Route(e, "game") // nolint:errcheck // not returning error
+	_ = routers.NewsRouter.Route(e, "news") // nolint:errcheck // not returning error
 
 	excludedAuthGroups := []string{
 		"/auth",

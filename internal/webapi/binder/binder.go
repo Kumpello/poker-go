@@ -3,11 +3,12 @@ package binder
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"pokergo/internal/webapi"
 	"pokergo/pkg/id"
 	"pokergo/pkg/jwt"
-	"time"
 )
 
 type Context struct {
@@ -20,7 +21,7 @@ type Context struct {
 }
 
 type StructValidator interface {
-	Struct(any interface{}) error
+	Struct(str interface{}) error
 }
 
 type BindError struct {
@@ -34,7 +35,7 @@ func (b BindError) Error() string {
 
 var _ error = (*BindError)(nil)
 
-func BindRequest[T any](c echo.Context, v StructValidator) (Context, T, *BindError) {
+func BindRequest[T any](c echo.Context, v StructValidator) (Context, T, *BindError) { // nolint:ireturn // generic type
 	result := Context{
 		Echo: c,
 	}

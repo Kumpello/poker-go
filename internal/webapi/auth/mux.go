@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"pokergo/internal/users"
 	"pokergo/internal/webapi/binder"
@@ -11,7 +13,6 @@ import (
 	"pokergo/pkg/id"
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/timer"
-	"time"
 )
 
 type mux struct {
@@ -106,7 +107,7 @@ func (m *mux) LogIn(c echo.Context) error {
 		return c.String(500, fmt.Sprintf("cannot find user (internal error): %s", err.Error()))
 	}
 
-	if err := crypto.VerifyPassword(u.Password, request.Password); err != nil {
+	if err = crypto.VerifyPassword(u.Password, request.Password); err != nil {
 		return c.String(403, fmt.Sprintf("invalid password: %s", err.Error()))
 	}
 

@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,7 +15,7 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), nil
 }
 
-//VerifyPassword compares user password with the encrypted one
+// VerifyPassword compares user password with the encrypted one
 func VerifyPassword(userPassword string, providedPassword string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(userPassword), []byte(providedPassword))
 

@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

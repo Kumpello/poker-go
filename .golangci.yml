@@ -96,6 +96,7 @@ linters-settings:
     case:
       rules:
         json: snake
+        bson: snake
   wrapcheck:
     ignoreSigs:
       - .Errorf(
