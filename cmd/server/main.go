@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator"
+	"pokergo/internal/articles"
 	"pokergo/internal/game"
 	"pokergo/internal/mongo"
 	"pokergo/internal/org"
@@ -55,11 +56,12 @@ func main() {
 	valid := validator.New()
 	jwtSecret := env.Env("JWT_SECRET", "jwt-token-123")
 	jwtInstance := jwt.NewJWT(utcTimer, []byte(jwtSecret), time.Duration(168)*time.Hour)
-
 	authRouter := authMux.NewMux(valid, usersAdapter, utcTimer, jwtInstance)
 	orgRouter := orgMux.NewMux(valid, orgAdapter, usersAdapter)
 	gameRouter := gameMux.NewMux(valid, gameManager)
-	newsRouter := newsMux.NewMux(valid)
+	newsRouter := newsMux.NewMux(valid, []articles.Getter{
+		articles.NewPokerNewsExtractor(),
+	})
 
 	isDebug := env.Env("DEBUG", "true")
 	e := webapi.NewEcho(
