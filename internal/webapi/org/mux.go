@@ -29,7 +29,7 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 }
 
 func (m *mux) NewOrg(c echo.Context) error {
-	data, req, bindErr := binder.BindRequest[newOrgRequest](c, m)
+	data, req, bindErr := binder.BindRequest[newOrgRequest](c, true, m)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -47,7 +47,7 @@ func (m *mux) NewOrg(c echo.Context) error {
 }
 
 func (m *mux) AddToOrg(c echo.Context) error {
-	data, req, bindErr := binder.BindRequest[addToOrgRequest](c, m)
+	data, req, bindErr := binder.BindRequest[addToOrgRequest](c, true, m)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -87,7 +87,7 @@ func (m *mux) AddToOrg(c echo.Context) error {
 }
 
 func (m *mux) ListOrg(c echo.Context) error {
-	data, _, bindErr := binder.BindRequest[listUserOrgRequest](c, m)
+	data, _, bindErr := binder.BindRequest[listUserOrgRequest](c, true, m)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}

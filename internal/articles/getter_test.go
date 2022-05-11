@@ -3,10 +3,12 @@ package articles
 import (
 	"path/filepath"
 	"testing"
+
+	"pokergo/pkg/timer"
 )
 
 func Test_PokerNewsGetter(t *testing.T) {
-	getter := NewPokerNewsExtractor()
+	getter := NewPokerNewsExtractor(timer.NewUTCTimer())
 	// replace provider to not use real-url
 	getter.provider = fileProvider{}
 	abs, _ := filepath.Abs("./poker_news.html.test")

@@ -17,6 +17,7 @@ type Collections struct {
 	Users *mongo.Collection
 	Org   *mongo.Collection
 	Games *mongo.Collection
+	Arts  *mongo.Collection
 }
 
 func NewMongo(ctx context.Context, uri, authDB, user, pass, db string) (*Collections, error) {
@@ -47,5 +48,6 @@ func NewMongo(ctx context.Context, uri, authDB, user, pass, db string) (*Collect
 		Users: appDB.Collection("users"),
 		Org:   appDB.Collection("organizations"),
 		Games: appDB.Collection("games"),
+		Arts:  appDB.Collection("articles"),
 	}, nil
 }

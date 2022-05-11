@@ -60,7 +60,7 @@ func (j JWT) ValidateToken(signed string) (SignedToken, error) {
 	token, err := jwt.ParseWithClaims(
 		signed,
 		&SignedToken{},
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			return j.secret, nil
 		})
 

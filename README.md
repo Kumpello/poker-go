@@ -32,6 +32,18 @@ type authResponse struct {
 All requests (except `/auth/*`) are required to have JWT token attached (`Header -> Authorization: Bearer <<token>>`).
 When token expires a user must renew it (with `/login`).
 
+# Articles Scrapper
+
+The app can scrape some sources to get news that can be displayed somewhere else. Currently, supported sources are:
+
+* pokernews.com/news
+
+The news are scrapped from the main page, then saved to the database. Clients get data from database. To run the
+scrapper use `go run cmd/cli/main.go updateArticles`.
+
+From Article data the hashCode is calculated and duplicated news are filtered. The hashCode will be returned to the
+client and used for the paging (TBD).
+
 # Development
 
 To run app in development, at first run MongoDB docker container:

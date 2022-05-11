@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"pokergo/pkg/timer"
 )
 
 type Getter interface {
@@ -15,14 +16,16 @@ type PokerNewsGetter struct {
 	provider provider
 	getter   func(provider provider, url string, getter htmlGetter) ([]Article, error)
 	newsURL  string
+	timer    timer.Timer
 }
 
-func NewPokerNewsExtractor() *PokerNewsGetter {
+func NewPokerNewsExtractor(timer timer.Timer) *PokerNewsGetter {
 	return &PokerNewsGetter{
 		fetchURL: "https://www.pokernews.com/news/",
 		newsURL:  "https://www.pokernews.com/news/",
 		provider: &htmlProvider{},
 		getter:   extractFromHTML,
+		timer:    timer,
 	}
 }
 
@@ -45,6 +48,7 @@ func (p PokerNewsGetter) extract(document *goquery.Document) ([]Article, error) 
 		title := div.Text()
 
 		res = append(res, Article{
+			Source:   SourcePokerNews,
 			IMGSrc:   imgSrc,
 			IMGAlt:   imgAlt,
 			IMGTitle: imgTitle,
@@ -53,6 +57,7 @@ func (p PokerNewsGetter) extract(document *goquery.Document) ([]Article, error) 
 			Metadata: map[string]string{
 				"category": strings.Trim(category, " "),
 			},
+			Date: p.timer.Now(),
 		})
 	})
 

@@ -8,11 +8,11 @@ import (
 
 type mux struct {
 	binder.StructValidator
-	getters []articles.Getter
+	artsAdapter articles.Adapter
 }
 
-func NewMux(structValidator binder.StructValidator, getters []articles.Getter) *mux {
-	return &mux{StructValidator: structValidator, getters: getters}
+func NewMux(structValidator binder.StructValidator, artsAdapter articles.Adapter) *mux {
+	return &mux{StructValidator: structValidator, artsAdapter: artsAdapter}
 }
 
 func (m *mux) Route(e *echo.Echo, prefix string) error {
@@ -21,16 +21,20 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 }
 
 // GetNews returns poker-news
-// TODO: Cache them instead of scrapping every time
 func (m *mux) GetNews(c echo.Context) error {
-	var res []newsResponseItem
+	data, _, bindErr := binder.BindRequest[any](c, false, m)
+	if bindErr != nil {
+		return c.String(bindErr.Code, bindErr.Message)
+	}
+	defer data.Cancel()
 
-	for _, v := range m.getters {
-		a, err := v.Get()
-		if err != nil {
-			return c.String(500, "cannot get articles")
-		}
-		res = append(res, a...)
+	var res []newsResponseItem
+	arts, err := m.artsAdapter.GetAll(data.Ctx)
+	if err != nil {
+		return c.String(500, "fetch arts err")
+	}
+	for _, a := range arts {
+		res = append(res, a.Article)
 	}
 
 	return c.JSON(200, getNewsResponse{res})

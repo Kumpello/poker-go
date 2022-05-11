@@ -37,6 +37,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot init mongo: %s", err.Error())
 	}
+	// TODO: EnsureIndexes in cli, not the server
 	usersAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
 	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
 		log.Fatalf("cannot create indexes on users collection: %s", err.Error())
@@ -49,6 +50,10 @@ func main() {
 	if err := gameAdapter.EnsureIndexes(appCtx); err != nil {
 		log.Fatalf("cannot create indexes on games collection: %s", err.Error())
 	}
+	artsAdapter := articles.NewMongoAdapter(mongoCollections.Arts)
+	if err := artsAdapter.EnsureIndexes(appCtx); err != nil {
+		log.Fatalf("cannot create indexes on articles collection: %s", err.Error())
+	}
 
 	gameManager := game.NewManager(gameAdapter, usersAdapter, orgAdapter)
 
@@ -59,9 +64,7 @@ func main() {
 	authRouter := authMux.NewMux(valid, usersAdapter, utcTimer, jwtInstance)
 	orgRouter := orgMux.NewMux(valid, orgAdapter, usersAdapter)
 	gameRouter := gameMux.NewMux(valid, gameManager)
-	newsRouter := newsMux.NewMux(valid, []articles.Getter{
-		articles.NewPokerNewsExtractor(),
-	})
+	newsRouter := newsMux.NewMux(valid, artsAdapter)
 
 	isDebug := env.Env("DEBUG", "true")
 	e := webapi.NewEcho(

@@ -3,6 +3,7 @@ package binder
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -21,7 +22,7 @@ type Context struct {
 }
 
 type StructValidator interface {
-	Struct(str interface{}) error
+	Struct(str any) error
 }
 
 type BindError struct {
@@ -35,7 +36,13 @@ func (b BindError) Error() string {
 
 var _ error = (*BindError)(nil)
 
-func BindRequest[T any](c echo.Context, v StructValidator) (Context, T, *BindError) { // nolint:ireturn // generic type
+// BindRequest bind requests returning Context, user data (if requireAuth) and an error.
+// T must be a simple type to be validated (pointers are not validated).
+func BindRequest[T any]( // nolint:ireturn // generic type
+	c echo.Context,
+	requireAuth bool,
+	v StructValidator,
+) (Context, T, *BindError) {
 	result := Context{
 		Echo: c,
 	}
@@ -46,17 +53,18 @@ func BindRequest[T any](c echo.Context, v StructValidator) (Context, T, *BindErr
 	result.Ctx = reqCtx
 	result.Cancel = cancel
 
-	// Obtain jwt token
-	jwtToken, err := webapi.GetJWTToken(c)
-	if err != nil {
-		return result, t, &BindError{403, "jwt token invalid"}
+	if requireAuth {
+		jwtToken, err := webapi.GetJWTToken(c)
+		if err != nil {
+			return result, t, &BindError{403, "jwt token invalid"}
+		}
+		requesterID, err := id.FromString(jwtToken.ID)
+		if err != nil {
+			return result, t, &BindError{400, fmt.Sprintf("invalid user id: %s", err)}
+		}
+		result.UserID = requesterID
+		result.TokenData = jwtToken
 	}
-	requesterID, err := id.FromString(jwtToken.ID)
-	if err != nil {
-		return result, t, &BindError{400, fmt.Sprintf("invalid user id: %s", err)}
-	}
-	result.UserID = requesterID
-	result.TokenData = jwtToken
 
 	// Obtain request
 	var request T
@@ -64,8 +72,10 @@ func BindRequest[T any](c echo.Context, v StructValidator) (Context, T, *BindErr
 		return result, t, &BindError{400, fmt.Sprintf("invalid request: %s", err.Error())}
 	}
 
-	if err := v.Struct(request); err != nil {
-		return result, t, &BindError{400, fmt.Sprintf("invalid request: %s", err.Error())}
+	if val := reflect.ValueOf(request); val.Kind() == reflect.Struct { // don't validate interface{} type
+		if err := v.Struct(request); err != nil {
+			return result, t, &BindError{400, fmt.Sprintf("invalid request: %s", err.Error())}
+		}
 	}
 
 	return result, request, nil
