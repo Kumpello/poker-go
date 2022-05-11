@@ -16,5 +16,12 @@ jobs:
           go-version: 1.18
       - name: build
         run: go build -v ./...
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
       - name: test
         run: go test -v ./...
