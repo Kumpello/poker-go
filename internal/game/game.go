@@ -149,7 +149,7 @@ func (g *Game) Verify() error {
 
 func (g *Game) Report() map[string]int64 {
 	g.playerMux.Lock()
-	g.playerMux.Unlock()
+	defer g.playerMux.Unlock()
 
 	res := make(map[string]int64, len(g.Players))
 	for _, p := range g.Players {

@@ -40,7 +40,10 @@ func Test_Pointer_ComplexType_DefaultValue(t *testing.T) {
 		dummy2 string
 	}
 
-	var c cpx
+	c := cpx{
+		dummy1: 0,
+		dummy2: "",
+	}
 	res := NilPointer(c)
 	if res != nil {
 		t.Fatalf("res should be a nil (all default values)")
@@ -55,6 +58,7 @@ func Test_Pointer_ComplexType_NotDefaultValue(t *testing.T) {
 
 	c := cpx{
 		dummy1: 10,
+		dummy2: "",
 	}
 	res := NilPointer(c)
 	if res == nil {

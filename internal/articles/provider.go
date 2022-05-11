@@ -15,14 +15,6 @@ type provider interface {
 	provide(what string) (io.ReadCloser, error)
 }
 
-// stringProvider just wraps the string into io.NopCloser
-type stringProvider struct {
-}
-
-func (s stringProvider) provide(what string) (io.ReadCloser, error) {
-	return io.NopCloser(strings.NewReader(what)), nil
-}
-
 // htmlProvider provides a file as "standard" curl request
 type htmlProvider struct {
 }

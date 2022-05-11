@@ -56,7 +56,7 @@ func (m *mux) AddToOrg(c echo.Context) error {
 	o, err := m.orgAdapter.GetOrgByName(data.Ctx, req.OrgName)
 	if err != nil {
 		if errors.Is(err, org.ErrOrgNotExists) {
-			return c.String(404, fmt.Sprintf("org not exists"))
+			return c.String(404, "org not exists")
 		}
 		return c.String(500, fmt.Sprintf("cannot find org: %s", err.Error()))
 	}
@@ -64,7 +64,7 @@ func (m *mux) AddToOrg(c echo.Context) error {
 	usr, err := m.userAdapter.GetUserByName(data.Ctx, req.Who)
 	if err != nil {
 		if errors.Is(err, users.ErrUserNotExists) {
-			return c.String(404, fmt.Sprintf("user not exists"))
+			return c.String(404, "user not exists")
 		}
 		return c.String(500, fmt.Sprintf("cannot perform the query: %s", err.Error()))
 	}
@@ -76,11 +76,11 @@ func (m *mux) AddToOrg(c echo.Context) error {
 
 	canAddMember := o.IsMember(data.UserID)
 	if !canAddMember {
-		return c.String(403, fmt.Sprintf("a user is NOT a member of the organization"))
+		return c.String(403, "a user is NOT a member of the organization")
 	}
 
 	if err := m.orgAdapter.AddToOrg(data.Ctx, o.ID, usr.ID); err != nil {
-		return c.String(500, fmt.Sprintf("cannot add user to org"))
+		return c.String(500, "cannot add user to org")
 	}
 
 	return c.String(200, "ok")
