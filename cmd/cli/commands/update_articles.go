@@ -20,7 +20,7 @@ func (c *commandApp) updateArticles() {
 		arts = append(arts, a...)
 	}
 
-	ids, err := c.artsAdapter.Save(c.ctx, arts)
+	ids, err := c.artsAdapter.Save(c.Context(), arts)
 	if err != nil {
 		c.logger.Fatalf("save article error: %s", err.Error())
 	}

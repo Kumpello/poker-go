@@ -37,24 +37,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot init mongo: %s", err.Error())
 	}
-	// TODO: EnsureIndexes in cli, not the server
 	usersAdapter := users.NewMongoAdapter(mongoCollections.Users, log)
-	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on users collection: %s", err.Error())
-	}
 	orgAdapter := org.NewMongoAdapter(mongoCollections.Org, utcTimer)
-	if err := usersAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on organizations collection: %s", err.Error())
-	}
 	gameAdapter := game.NewMongoAdapter(mongoCollections.Games, utcTimer)
-	if err := gameAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on games collection: %s", err.Error())
-	}
 	artsAdapter := articles.NewMongoAdapter(mongoCollections.Arts)
-	if err := artsAdapter.EnsureIndexes(appCtx); err != nil {
-		log.Fatalf("cannot create indexes on articles collection: %s", err.Error())
-	}
-
 	gameManager := game.NewManager(gameAdapter, usersAdapter, orgAdapter)
 
 	// Echo

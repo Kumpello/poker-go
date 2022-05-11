@@ -1,10 +1,9 @@
 package commands
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 	"pokergo/internal/articles"
+	"pokergo/internal/mongo"
 	"pokergo/pkg/logger"
 	"pokergo/pkg/timer"
 )
@@ -12,18 +11,18 @@ import (
 type commandApp struct {
 	*cobra.Command
 
-	ctx    context.Context
 	logger logger.Logger
 	timer  timer.Timer
 
+	mongoColls  *mongo.Collections
 	artsAdapter articles.Adapter
 }
 
 func NewCommandApp(
-	ctx context.Context,
 	lg logger.Logger,
 	tm timer.Timer,
 	artsAdap articles.Adapter,
+	mongoColls *mongo.Collections,
 ) *commandApp {
 	rootCmd := &cobra.Command{
 		Use:   "pokergo",
@@ -37,10 +36,10 @@ func NewCommandApp(
 
 	app := &commandApp{
 		Command:     rootCmd,
-		ctx:         ctx,
 		logger:      lg,
 		timer:       tm,
 		artsAdapter: artsAdap,
+		mongoColls:  mongoColls,
 	}
 
 	dummyCmd := &cobra.Command{
@@ -48,6 +47,14 @@ func NewCommandApp(
 		Short: "Just print debug info on the screen",
 		Run: func(cmd *cobra.Command, args []string) {
 			app.logger.Info("You are a dummy!")
+		},
+	}
+
+	mongoIndexes := &cobra.Command{
+		Use:   "mongoIndexes",
+		Short: "sets mongo indexes (must be run after each index change)",
+		Run: func(cmd *cobra.Command, args []string) {
+			app.mongoIndexes()
 		},
 	}
 
@@ -60,6 +67,8 @@ func NewCommandApp(
 	}
 
 	rootCmd.AddCommand(dummyCmd)
+	rootCmd.AddCommand(mongoIndexes)
 	rootCmd.AddCommand(fetchArticles)
+
 	return app
 }

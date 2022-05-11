@@ -28,8 +28,8 @@ func main() {
 
 	artsAdapter := articles.NewMongoAdapter(mongoCollections.Arts)
 
-	cmd := commands.NewCommandApp(appCtx, log, utcTimer, artsAdapter)
-	if err := cmd.Execute(); err != nil {
+	cmd := commands.NewCommandApp(log, utcTimer, artsAdapter, mongoCollections)
+	if err := cmd.ExecuteContext(appCtx); err != nil {
 		log.Fatal(err)
 	}
 }
