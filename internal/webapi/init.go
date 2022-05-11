@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/logger"
@@ -12,6 +13,14 @@ import (
 
 type Router interface {
 	Route(e *echo.Echo, prefix string) error
+}
+
+type echoValidator struct {
+	validator *validator.Validate
+}
+
+func (v *echoValidator) Validate(i any) error {
+	return v.validator.Struct(i) // nolint:wrapcheck  // that's ok (echo framework)
 }
 
 func GetJWTToken(c echo.Context) (jwt.SignedToken, error) {
@@ -32,6 +41,7 @@ type EchoRouters struct {
 }
 
 func NewEcho(
+	validate *validator.Validate,
 	jwtInstance *jwt.JWT,
 	routers EchoRouters,
 	log logger.Logger,
@@ -39,6 +49,7 @@ func NewEcho(
 ) *echo.Echo {
 	e := echo.New()
 	e.Debug = debug
+	e.Validator = &echoValidator{validator: validate}
 
 	_ = routers.AuthMux.Route(e, "auth")    // nolint:errcheck // not returning error
 	_ = routers.OrgRouter.Route(e, "org")   // nolint:errcheck // not returning error

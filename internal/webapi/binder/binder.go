@@ -41,7 +41,6 @@ var _ error = (*BindError)(nil)
 func BindRequest[T any]( // nolint:ireturn // generic type
 	c echo.Context,
 	requireAuth bool,
-	v StructValidator,
 ) (Context, T, *BindError) {
 	result := Context{
 		Echo: c,
@@ -73,7 +72,7 @@ func BindRequest[T any]( // nolint:ireturn // generic type
 	}
 
 	if val := reflect.ValueOf(request); val.Kind() == reflect.Struct { // don't validate interface{} type
-		if err := v.Struct(request); err != nil {
+		if err := c.Validate(request); err != nil {
 			return result, t, &BindError{400, fmt.Sprintf("invalid request: %s", err.Error())}
 		}
 	}

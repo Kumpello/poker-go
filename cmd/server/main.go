@@ -44,16 +44,17 @@ func main() {
 	gameManager := game.NewManager(gameAdapter, usersAdapter, orgAdapter)
 
 	// Echo
-	valid := validator.New()
 	jwtSecret := env.Env("JWT_SECRET", "jwt-token-123")
 	jwtInstance := jwt.NewJWT(utcTimer, []byte(jwtSecret), time.Duration(168)*time.Hour)
-	authRouter := authMux.NewMux(valid, usersAdapter, utcTimer, jwtInstance)
-	orgRouter := orgMux.NewMux(valid, orgAdapter, usersAdapter)
-	gameRouter := gameMux.NewMux(valid, gameManager)
-	newsRouter := newsMux.NewMux(valid, artsAdapter)
+	authRouter := authMux.NewMux(usersAdapter, utcTimer, jwtInstance)
+	orgRouter := orgMux.NewMux(orgAdapter, usersAdapter)
+	gameRouter := gameMux.NewMux(gameManager)
+	newsRouter := newsMux.NewMux(artsAdapter)
 
 	isDebug := env.Env("DEBUG", "true")
+	validate := validator.New()
 	e := webapi.NewEcho(
+		validate,
 		jwtInstance,
 		webapi.EchoRouters{
 			AuthMux:    authRouter,
@@ -63,7 +64,6 @@ func main() {
 		},
 		log,
 		isDebug == "true")
-
 	// Start server
 	port := env.Env("APP_PORT", "8080")
 	log.Fatal(e.Start(fmt.Sprintf(":%s", port)))

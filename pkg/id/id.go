@@ -15,6 +15,10 @@ func NewID() ID {
 }
 
 func FromString(s string) (ID, error) {
+	if s == "" {
+		return ZeroID, nil
+	}
+
 	id, err := primitive.ObjectIDFromHex(s)
 	if err != nil {
 		return ZeroID, fmt.Errorf("cannot parse id: %w", err)

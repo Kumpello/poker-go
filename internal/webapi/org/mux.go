@@ -12,13 +12,12 @@ import (
 )
 
 type mux struct {
-	binder.StructValidator
 	orgAdapter  org.Adapter
 	userAdapter users.Adapter
 }
 
-func NewMux(validator binder.StructValidator, orgAdapter org.Adapter, userAdapter users.Adapter) *mux {
-	return &mux{validator, orgAdapter, userAdapter}
+func NewMux(orgAdapter org.Adapter, userAdapter users.Adapter) *mux {
+	return &mux{orgAdapter, userAdapter}
 }
 
 func (m *mux) Route(e *echo.Echo, prefix string) error {
@@ -29,7 +28,7 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 }
 
 func (m *mux) NewOrg(c echo.Context) error {
-	data, req, bindErr := binder.BindRequest[newOrgRequest](c, true, m)
+	data, req, bindErr := binder.BindRequest[newOrgRequest](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -47,7 +46,7 @@ func (m *mux) NewOrg(c echo.Context) error {
 }
 
 func (m *mux) AddToOrg(c echo.Context) error {
-	data, req, bindErr := binder.BindRequest[addToOrgRequest](c, true, m)
+	data, req, bindErr := binder.BindRequest[addToOrgRequest](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -87,7 +86,7 @@ func (m *mux) AddToOrg(c echo.Context) error {
 }
 
 func (m *mux) ListOrg(c echo.Context) error {
-	data, _, bindErr := binder.BindRequest[listUserOrgRequest](c, true, m)
+	data, _, bindErr := binder.BindRequest[listUserOrgRequest](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}

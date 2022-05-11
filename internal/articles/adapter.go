@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/multierr"
+	"pokergo/pkg/id"
 	"pokergo/pkg/pointers"
 )
 
@@ -15,7 +16,9 @@ type Adapter interface {
 	// Save saves articles (ignores duplicates)
 	Save(ctx context.Context, arts []Article) ([]interface{}, error)
 	// GetAll returns all saved articles
-	GetAll(ctx context.Context) ([]mongoArticle, error)
+	GetAll(ctx context.Context) ([]shaArticle, error)
+	// GetNext returns n documents
+	GetNext(ctx context.Context, lastDocID id.ID, no int) ([]shaArticle, error)
 }
 
 type mongoAdapter struct {
@@ -52,9 +55,9 @@ func (m *mongoAdapter) Save(ctx context.Context, arts []Article) ([]interface{},
 
 	var mongoArts []any // must be generic type
 	for idx := range arts {
-		mArt, err := convertToMongo(arts[idx])
+		mArt, err := convertToSHA(arts[idx])
 		if err != nil {
-			return nil, fmt.Errorf("cannot convert article to mongoArticle: %w", err)
+			return nil, fmt.Errorf("cannot convert article to shaArticle: %w", err)
 		}
 		mongoArts = append(mongoArts, mArt)
 	}
@@ -84,15 +87,38 @@ func (m *mongoAdapter) Save(ctx context.Context, arts []Article) ([]interface{},
 	return res.InsertedIDs, multierr.Combine(realErrors...)
 }
 
-func (m *mongoAdapter) GetAll(ctx context.Context) ([]mongoArticle, error) {
+func (m *mongoAdapter) GetAll(ctx context.Context) ([]shaArticle, error) {
 	cur, err := m.coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("cannot perform the query: %w", err)
 	}
 
-	var articles []mongoArticle
+	var articles []shaArticle
 	if err := cur.All(ctx, &articles); err != nil {
 		return nil, fmt.Errorf("cannot bind the data: %w", err)
+	}
+
+	return articles, nil
+}
+
+func (m *mongoAdapter) GetNext(ctx context.Context, lastDocID id.ID, no int) ([]shaArticle, error) {
+	filter := bson.M{
+		"_id": bson.M{
+			"$gt": lastDocID,
+		},
+	}
+	opts := &options.FindOptions{
+		Limit: pointers.Pointer(int64(no)),
+	}
+
+	cur, err := m.coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get articles: %w", err)
+	}
+
+	var articles []shaArticle
+	if err := cur.All(ctx, &articles); err != nil {
+		return nil, fmt.Errorf("cannot bind articles: %w", err)
 	}
 
 	return articles, nil

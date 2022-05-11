@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"pokergo/pkg/id"
 )
 
 type Source string
@@ -16,6 +17,7 @@ const (
 )
 
 type Article struct {
+	ID       id.ID             `json:"id" bson:"_id"` // nolint:tagliatelle // mongo-id
 	Source   Source            `json:"source" bson:"source"`
 	IMGSrc   string            `json:"img_src" bson:"img_src"`
 	IMGAlt   string            `json:"img_alt" bson:"img_alt"`
@@ -26,13 +28,13 @@ type Article struct {
 	Date     time.Time         `json:"date" bson:"date"`
 }
 
-type mongoArticle struct {
+type shaArticle struct {
 	Article `bson:",inline"`
 
 	ShaHash string `bson:"hash_code"`
 }
 
-func convertToMongo(article Article) (mongoArticle, error) {
+func convertToSHA(article Article) (shaArticle, error) {
 	// remove date from hash-calc
 	oldDate := article.Date
 	article.Date = time.Time{}
@@ -41,9 +43,9 @@ func convertToMongo(article Article) (mongoArticle, error) {
 	hash := sha256.New()
 	hash.Write(marshall)
 	if err != nil {
-		return mongoArticle{}, fmt.Errorf("cannot conver article to mongoArticle: %w", err)
+		return shaArticle{}, fmt.Errorf("cannot conver article to shaArticle: %w", err)
 	}
 
 	article.Date = oldDate
-	return mongoArticle{article, hex.EncodeToString(hash.Sum(nil))}, nil
+	return shaArticle{article, hex.EncodeToString(hash.Sum(nil))}, nil
 }
