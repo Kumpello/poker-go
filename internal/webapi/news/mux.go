@@ -25,7 +25,7 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 //	lastDocID = string, default empty (returns from the begging)
 //	no = int, default 20, min 5, max 40
 func (m *mux) GetNews(c echo.Context) error {
-	data, _, bindErr := binder.BindRequest[any](c, false)
+	data, bindErr := binder.BindRequest[any, any](c, false)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -41,7 +41,7 @@ func (m *mux) GetNews(c echo.Context) error {
 	}
 
 	var res []newsResponseItem
-	arts, err := m.artsAdapter.GetNext(data.Ctx, lastItemID, queryParams.no)
+	arts, err := m.artsAdapter.GetNext(data.Context(), lastItemID, queryParams.no)
 	if err != nil {
 		return c.String(500, "fetch arts err")
 	}

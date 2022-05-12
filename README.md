@@ -51,6 +51,28 @@ To run app in development, at first run MongoDB docker container:
 
 This command will run the mongodb container with root user: `root:password123` on port 27017
 
+## Binding Requests
+
+There is a very useful generic function that binds the HTTP request and validates it.
+
+```go
+package request
+
+func echoFunc(c echo.Context) error {
+	data, bindErr := binder.BindRequest[bodyType, queryType](c, true)
+	if bindErr != nil {
+		return c.String(bindErr.Code, bindErr.Message)
+	}
+	defer data.Cancel()
+
+	// to access the body/query use:
+	data.Request // binds basing on json-tags and validate-tags
+	data.Query   // TBD
+
+	return c.String(200, "ok")
+}
+```
+
 # Production
 
 TBD.

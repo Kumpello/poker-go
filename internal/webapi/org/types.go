@@ -16,7 +16,7 @@ type addToOrgRequest struct {
 	Who     string `json:"who" validate:"required"`
 }
 
-type listUserOrgRequest struct {
+type listUserOrgRequest struct { // nolint:unused // used as generic param
 	// empty
 }
 

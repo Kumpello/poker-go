@@ -28,13 +28,13 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 }
 
 func (m *mux) NewOrg(c echo.Context) error {
-	data, req, bindErr := binder.BindRequest[newOrgRequest](c, true)
+	data, bindErr := binder.BindRequest[newOrgRequest, any](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
 	defer data.Cancel()
 
-	o, err := m.orgAdapter.CreateOrg(data.Ctx, data.UserID, req.Name)
+	o, err := m.orgAdapter.CreateOrg(data.Context(), data.UserID(), data.Request.Name)
 	if err != nil {
 		return c.String(500, fmt.Sprintf("cannot create organization: %s", err))
 	}
@@ -46,13 +46,13 @@ func (m *mux) NewOrg(c echo.Context) error {
 }
 
 func (m *mux) AddToOrg(c echo.Context) error {
-	data, req, bindErr := binder.BindRequest[addToOrgRequest](c, true)
+	data, bindErr := binder.BindRequest[addToOrgRequest, any](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
 	defer data.Cancel()
 
-	o, err := m.orgAdapter.GetOrgByName(data.Ctx, req.OrgName)
+	o, err := m.orgAdapter.GetOrgByName(data.Context(), data.Request.OrgName)
 	if err != nil {
 		if errors.Is(err, org.ErrOrgNotExists) {
 			return c.String(404, "org not exists")
@@ -60,7 +60,7 @@ func (m *mux) AddToOrg(c echo.Context) error {
 		return c.String(500, fmt.Sprintf("cannot find org: %s", err.Error()))
 	}
 
-	usr, err := m.userAdapter.GetUserByName(data.Ctx, req.Who)
+	usr, err := m.userAdapter.GetUserByName(data.Context(), data.Request.Who)
 	if err != nil {
 		if errors.Is(err, users.ErrUserNotExists) {
 			return c.String(404, "user not exists")
@@ -73,12 +73,12 @@ func (m *mux) AddToOrg(c echo.Context) error {
 		return c.String(400, "user already is a member of this org")
 	}
 
-	canAddMember := o.IsMember(data.UserID)
+	canAddMember := o.IsMember(data.UserID())
 	if !canAddMember {
 		return c.String(403, "a user is NOT a member of the organization")
 	}
 
-	if err := m.orgAdapter.AddToOrg(data.Ctx, o.ID, usr.ID); err != nil {
+	if err := m.orgAdapter.AddToOrg(data.Context(), o.ID, usr.ID); err != nil {
 		return c.String(500, "cannot add user to org")
 	}
 
@@ -86,20 +86,20 @@ func (m *mux) AddToOrg(c echo.Context) error {
 }
 
 func (m *mux) ListOrg(c echo.Context) error {
-	data, _, bindErr := binder.BindRequest[listUserOrgRequest](c, true)
+	data, bindErr := binder.BindRequest[listUserOrgRequest, any](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
 	defer data.Cancel()
 
-	orgs, err := m.orgAdapter.ListUserOrg(data.Ctx, data.UserID)
+	orgs, err := m.orgAdapter.ListUserOrg(data.Context(), data.UserID())
 	if err != nil {
 		return c.String(500, fmt.Sprintf("cannot fetch data: %s", err.Error()))
 	}
 
 	var response []orgResponse
 	for _, o := range orgs {
-		members, err := m.userAdapter.UserDetails(data.Ctx, o.Members)
+		members, err := m.userAdapter.UserDetails(data.Context(), o.Members)
 		if err != nil {
 			return c.String(500, fmt.Sprintf("cannot get org-details: %s", err.Error()))
 		}
