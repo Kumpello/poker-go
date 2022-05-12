@@ -29,7 +29,7 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 // CreateGame just creates a game for a specific user.
 // The game is empty and has no players attached (except the organizer).
 func (m *mux) CreateGame(c echo.Context) error {
-	data, bindErr := binder.BindRequest[createGameRequest, any](c, true)
+	data, bindErr := binder.BindRequest[createGameRequest](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -44,7 +44,7 @@ func (m *mux) CreateGame(c echo.Context) error {
 }
 
 func (m *mux) AppendPlayer(c echo.Context) error {
-	data, bindErr := binder.BindRequest[appendPlayerRequest, any](c, true)
+	data, bindErr := binder.BindRequest[appendPlayerRequest](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -72,7 +72,7 @@ func (m *mux) AppendPlayer(c echo.Context) error {
 }
 
 func (m *mux) SetFinishStack(c echo.Context) error {
-	data, bindErr := binder.BindRequest[setFinishStack, any](c, true)
+	data, bindErr := binder.BindRequest[setFinishStack](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -88,7 +88,7 @@ func (m *mux) SetFinishStack(c echo.Context) error {
 }
 
 func (m *mux) ReBuyIn(c echo.Context) error {
-	data, bindErr := binder.BindRequest[reBuyIn, any](c, true)
+	data, bindErr := binder.BindRequest[reBuyIn](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
@@ -104,7 +104,7 @@ func (m *mux) ReBuyIn(c echo.Context) error {
 }
 
 func (m *mux) ReBuyInFromPlayer(c echo.Context) error {
-	data, bindErr := binder.BindRequest[reBuyInFromPlayer, any](c, true)
+	data, bindErr := binder.BindRequest[reBuyInFromPlayer](c, true)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}

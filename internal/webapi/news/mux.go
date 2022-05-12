@@ -5,6 +5,7 @@ import (
 	"pokergo/internal/articles"
 	"pokergo/internal/webapi/binder"
 	"pokergo/pkg/id"
+	"pokergo/pkg/iif"
 )
 
 type mux struct {
@@ -25,23 +26,20 @@ func (m *mux) Route(e *echo.Echo, prefix string) error {
 //	lastDocID = string, default empty (returns from the begging)
 //	no = int, default 20, min 5, max 40
 func (m *mux) GetNews(c echo.Context) error {
-	data, bindErr := binder.BindRequest[any, any](c, false)
+	data, bindErr := binder.BindRequest[getNewsRequest](c, false)
 	if bindErr != nil {
 		return c.String(bindErr.Code, bindErr.Message)
 	}
 	defer data.Cancel()
 
-	var queryParams getURLOpts
-	if err := queryParams.BindQuery(c); err != nil {
-		return c.String(400, "invalid query params")
-	}
-	lastItemID, err := id.FromString(queryParams.lastDocID)
+	lastItemID, err := id.FromString(*data.Request.LastDocID)
 	if err != nil {
 		return c.String(400, "unparseable last item id")
 	}
 
 	var res []newsResponseItem
-	arts, err := m.artsAdapter.GetNext(data.Context(), lastItemID, queryParams.no)
+	arts, err := m.artsAdapter.GetNext(data.Context(), lastItemID,
+		iif.IfElse(data.Request.NO == 0, 20, data.Request.NO))
 	if err != nil {
 		return c.String(500, "fetch arts err")
 	}

@@ -1,34 +1,12 @@
 package news
 
 import (
-	"fmt"
-
-	"github.com/labstack/echo/v4"
 	"pokergo/internal/articles"
 )
 
-// TODO: Create an echo-binder based on tags with validate
-
-type getURLOpts struct {
-	lastDocID string
-	no        int
-}
-
-func (g *getURLOpts) BindQuery(ctx echo.Context) error {
-	err := echo.QueryParamsBinder(ctx).
-		String("lastDocID", &g.lastDocID).
-		Int("no", &g.no).
-		BindError()
-
-	if err != nil {
-		return fmt.Errorf("cannot bind the query: %w", err)
-	}
-
-	if g.no == 0 {
-		g.no = 20
-	}
-
-	return nil
+type getNewsRequest struct {
+	LastDocID *string `query:"lastDocID" validate:"hexadecimal,len=24"`
+	NO        int     `query:"no" validate:"omitempty,gte=5,lte=40"`
 }
 
 type newsResponseItem = articles.Article
