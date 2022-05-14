@@ -39,7 +39,8 @@ linters:
     - goprintffuncname
     - gosec
     - ifshort
-    - ireturn
+    # Not full go1.18 support, disable for a while
+    # - ireturn
     - lll
     - makezero
     - misspell
