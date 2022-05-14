@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/multierr"
 	"pokergo/pkg/id"
+	"pokergo/pkg/iif"
 	"pokergo/pkg/pointers"
 )
 
@@ -102,14 +103,18 @@ func (m *mongoAdapter) GetAll(ctx context.Context) ([]shaArticle, error) {
 }
 
 func (m *mongoAdapter) GetNext(ctx context.Context, lastDocID id.ID, no int) ([]shaArticle, error) {
-	filter := bson.M{
-		"_id": bson.M{
-			"$gt": lastDocID,
-		},
-	}
 	opts := &options.FindOptions{
 		Limit: pointers.Pointer(int64(no)),
+		Sort:  bson.M{"_id": -1},
 	}
+
+	filter := iif.IfElse(lastDocID.IsZero(),
+		bson.M{},
+		bson.M{
+			"_id": bson.M{
+				"$lt": lastDocID,
+			},
+		})
 
 	cur, err := m.coll.Find(ctx, filter, opts)
 	if err != nil {

@@ -32,7 +32,7 @@ func (m *mux) GetNews(c echo.Context) error {
 	}
 	defer data.Cancel()
 
-	lastItemID, err := id.FromString(*data.Request.LastDocID)
+	lastItemID, err := id.FromString(iif.EmptyIfNil(data.Request.LastDocID))
 	if err != nil {
 		return c.String(400, "unparseable last item id")
 	}

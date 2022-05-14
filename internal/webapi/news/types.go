@@ -5,7 +5,7 @@ import (
 )
 
 type getNewsRequest struct {
-	LastDocID *string `query:"lastDocID" validate:"hexadecimal,len=24"`
+	LastDocID *string `query:"lastDocID" validate:"omitempty,hexadecimal,len=24"`
 	NO        int     `query:"no" validate:"omitempty,gte=5,lte=40"`
 }
 
