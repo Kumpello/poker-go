@@ -17,13 +17,12 @@ func NewMux(gameManager game.Manager) *mux {
 	return &mux{gameManager}
 }
 
-func (m *mux) Route(e *echo.Echo, prefix string) error {
-	e.POST(prefix+"/createGame", m.CreateGame)
-	e.POST(prefix+"/appendPlayer", m.AppendPlayer)
-	e.POST(prefix+"/setFinishStack", m.SetFinishStack)
-	e.POST(prefix+"/reBuyIn", m.ReBuyIn)
-	e.POST(prefix+"/reBuyInFromPlayer", m.ReBuyInFromPlayer)
-	return nil
+func (m *mux) Route(g *echo.Group) {
+	g.POST("createGame", m.CreateGame)
+	g.POST("appendPlayer", m.AppendPlayer)
+	g.POST("setFinishStack", m.SetFinishStack)
+	g.POST("reBuyIn", m.ReBuyIn)
+	g.POST("reBuyInFromPlayer", m.ReBuyInFromPlayer)
 }
 
 // CreateGame just creates a game for a specific user.

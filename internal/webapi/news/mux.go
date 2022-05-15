@@ -16,9 +16,8 @@ func NewMux(artsAdapter articles.Adapter) *mux {
 	return &mux{artsAdapter: artsAdapter}
 }
 
-func (m *mux) Route(e *echo.Echo, prefix string) error {
-	e.GET(prefix, m.GetNews)
-	return nil
+func (m *mux) Route(g *echo.Group) {
+	g.GET("", m.GetNews)
 }
 
 // GetNews returns poker-news

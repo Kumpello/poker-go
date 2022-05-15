@@ -12,7 +12,7 @@ import (
 )
 
 type Router interface {
-	Route(e *echo.Echo, prefix string) error
+	Route(g *echo.Group)
 }
 
 type echoValidator struct {
@@ -51,37 +51,8 @@ func NewEcho(
 	e.Debug = debug
 	e.Validator = &echoValidator{validator: validate}
 
-	_ = routers.AuthMux.Route(e, "auth")    // nolint:errcheck // not returning error
-	_ = routers.OrgRouter.Route(e, "org")   // nolint:errcheck // not returning error
-	_ = routers.GameRouter.Route(e, "game") // nolint:errcheck // not returning error
-	_ = routers.NewsRouter.Route(e, "news") // nolint:errcheck // not returning error
-
-	excludedAuthGroups := []string{
-		"/auth",
-		"/news",
-		"/health",
-	}
-
-	e.GET("health", func(c echo.Context) error {
-		return c.JSON(200, "ok")
-	})
-
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	auth := func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			logger.MakeEchoLogEntry(log, c).Info("incoming request")
-			return next(c)
-		}
-	})
-
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			uri := c.Request().RequestURI
-			for i := range excludedAuthGroups {
-				if strings.HasPrefix(uri, excludedAuthGroups[i]) {
-					return next(c)
-				}
-			}
-
 			jwtToken := c.Request().Header.Get("Authorization")
 			if jwtToken == "" {
 				return c.String(403, "missing jwt token")
@@ -99,7 +70,30 @@ func NewEcho(
 
 			return next(c)
 		}
+	}
+
+	authRouter := e.Group("auth")
+	orgRouter := e.Group("org", auth)
+	gameRouter := e.Group("game", auth)
+	newsRouter := e.Group("news", auth)
+
+	routers.AuthMux.Route(authRouter)
+	routers.OrgRouter.Route(orgRouter)
+	routers.GameRouter.Route(gameRouter)
+	routers.NewsRouter.Route(newsRouter)
+
+	e.GET("health", func(c echo.Context) error {
+		return c.JSON(200, "ok")
 	})
+
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			logger.MakeEchoLogEntry(log, c).Info("incoming request")
+			return next(c)
+		}
+	})
+
+	e.Use()
 
 	// Required for the vue-js framework
 	// better security rules

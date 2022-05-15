@@ -28,10 +28,9 @@ func NewMux(
 	return &mux{userAdapter, timer, jwt}
 }
 
-func (m *mux) Route(e *echo.Echo, prefix string) error {
-	e.POST(prefix+"/signup", m.SignUp)
-	e.POST(prefix+"/login", m.LogIn)
-	return nil
+func (m *mux) Route(g *echo.Group) {
+	g.POST("signup", m.SignUp)
+	g.POST("login", m.LogIn)
 }
 
 func (m *mux) SignUp(c echo.Context) error {

@@ -20,11 +20,10 @@ func NewMux(orgAdapter org.Adapter, userAdapter users.Adapter) *mux {
 	return &mux{orgAdapter, userAdapter}
 }
 
-func (m *mux) Route(e *echo.Echo, prefix string) error {
-	e.POST(prefix+"/newOrg", m.NewOrg)
-	e.POST(prefix+"/addToOrg", m.AddToOrg)
-	e.GET(prefix+"/listOrg", m.ListOrg)
-	return nil
+func (m *mux) Route(g *echo.Group) {
+	g.POST("newOrg", m.NewOrg)
+	g.POST("addToOrg", m.AddToOrg)
+	g.GET("listOrg", m.ListOrg)
 }
 
 func (m *mux) NewOrg(c echo.Context) error {
