@@ -75,7 +75,7 @@ func NewEcho(
 	authRouter := e.Group("auth")
 	orgRouter := e.Group("org", auth)
 	gameRouter := e.Group("game", auth)
-	newsRouter := e.Group("news", auth)
+	newsRouter := e.Group("news")
 
 	routers.AuthMux.Route(authRouter)
 	routers.OrgRouter.Route(orgRouter)

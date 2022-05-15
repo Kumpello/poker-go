@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/vue/poker-vue/.idea/poker-vue.iml" filepath="$USER_HOME$/vue/poker-vue/.idea/poker-vue.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/pokergo.iml" filepath="$PROJECT_DIR$/.idea/pokergo.iml" />
     </modules>
   </component>
