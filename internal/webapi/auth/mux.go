@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"pokergo/internal/users"
 	"pokergo/pkg/crypto"
 	"pokergo/pkg/id"
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/timer"
+
+	"github.com/labstack/echo/v4"
 )
 
 type mux struct {
@@ -29,8 +30,8 @@ func NewMux(
 }
 
 func (m *mux) Route(g *echo.Group) {
-	g.POST("signup", m.SignUp)
-	g.POST("login", m.LogIn)
+	g.POST("/signup", m.SignUp)
+	g.POST("/login", m.LogIn)
 }
 
 func (m *mux) SignUp(c echo.Context) error {
