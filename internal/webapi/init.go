@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"pokergo/pkg/jwt"
-	"pokergo/pkg/logger"
-
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
+	"pokergo/pkg/jwt"
+	"pokergo/pkg/logger"
 )
 
 type Router interface {

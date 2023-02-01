@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-playground/validator"
 	"pokergo/internal/articles"
 	"pokergo/internal/game"
 	"pokergo/internal/mongo"
@@ -19,8 +20,6 @@ import (
 	"pokergo/pkg/jwt"
 	"pokergo/pkg/logger"
 	"pokergo/pkg/timer"
-
-	"github.com/go-playground/validator"
 )
 
 func main() {
