@@ -18,11 +18,11 @@ func NewMux(gameManager game.Manager) *mux {
 }
 
 func (m *mux) Route(g *echo.Group) {
-	g.POST("createGame", m.CreateGame)
-	g.POST("appendPlayer", m.AppendPlayer)
-	g.POST("setFinishStack", m.SetFinishStack)
-	g.POST("reBuyIn", m.ReBuyIn)
-	g.POST("reBuyInFromPlayer", m.ReBuyInFromPlayer)
+	g.POST("/createGame", m.CreateGame)
+	g.POST("/appendPlayer", m.AppendPlayer)
+	g.POST("/setFinishStack", m.SetFinishStack)
+	g.POST("/reBuyIn", m.ReBuyIn)
+	g.POST("/reBuyInFromPlayer", m.ReBuyInFromPlayer)
 }
 
 // CreateGame just creates a game for a specific user.

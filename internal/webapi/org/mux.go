@@ -21,9 +21,9 @@ func NewMux(orgAdapter org.Adapter, userAdapter users.Adapter) *mux {
 }
 
 func (m *mux) Route(g *echo.Group) {
-	g.POST("newOrg", m.NewOrg)
-	g.POST("addToOrg", m.AddToOrg)
-	g.GET("listOrg", m.ListOrg)
+	g.POST("/newOrg", m.NewOrg)
+	g.POST("/addToOrg", m.AddToOrg)
+	g.GET("/listOrg", m.ListOrg)
 }
 
 func (m *mux) NewOrg(c echo.Context) error {

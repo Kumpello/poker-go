@@ -57,7 +57,7 @@ func main() {
 		validate,
 		jwtInstance,
 		webapi.EchoRouters{
-			AuthMux:    authRouter,
+			AuthRouter: authRouter,
 			OrgRouter:  orgRouter,
 			GameRouter: gameRouter,
 			NewsRouter: newsRouter,
