@@ -34,7 +34,7 @@ func GetJWTToken(c echo.Context) (jwt.SignedToken, error) {
 }
 
 type EchoRouters struct {
-	AuthMux    Router
+	AuthRouter Router
 	OrgRouter  Router
 	GameRouter Router
 	NewsRouter Router
@@ -72,12 +72,12 @@ func NewEcho(
 		}
 	}
 
-	authRouter := e.Group("auth")
-	orgRouter := e.Group("org", auth)
-	gameRouter := e.Group("game", auth)
-	newsRouter := e.Group("news")
+	authRouter := e.Group("/auth")
+	orgRouter := e.Group("/org", auth)
+	gameRouter := e.Group("/game", auth)
+	newsRouter := e.Group("/news")
 
-	routers.AuthMux.Route(authRouter)
+	routers.AuthRouter.Route(authRouter)
 	routers.OrgRouter.Route(orgRouter)
 	routers.GameRouter.Route(gameRouter)
 	routers.NewsRouter.Route(newsRouter)

@@ -29,8 +29,8 @@ func NewMux(
 }
 
 func (m *mux) Route(g *echo.Group) {
-	g.POST("signup", m.SignUp)
-	g.POST("login", m.LogIn)
+	g.POST("/signup", m.SignUp)
+	g.POST("/login", m.LogIn)
 }
 
 func (m *mux) SignUp(c echo.Context) error {
